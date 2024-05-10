@@ -1,5 +1,6 @@
 import json
-from subprocess import PIPE, run
+from playwright.sync_api import sync_playwright
+from subprocess import run, PIPE
 
 
 def get_username_password_otp():
@@ -16,4 +17,14 @@ def get_username_password_otp():
     return {"username": username, "password": password, "otp": otp}
 
 
-get_username_password_otp()
+def order_car():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(slow_mo=50, headless=False)
+        page = browser.new_page()
+        page.goto(
+            "https://auth.tesla.com/oauth2/v1/authorize?response_type=code&client_id=teslaforbusiness-prod&redirect_uri=https%3A%2F%2Fwww.tesla.com%2Fteslaaccount%2Fbusiness%2Ffulfillment%2Foauth2-connect&scope=email+profile+openid+offline_access&state=4mxCQokkKEr8wCI5pKzetp4wF9RlTxcM"
+        )
+        page.screenshot(path="example.png")
+        browser.close()
+
+order_car()
