@@ -17,14 +17,25 @@ def get_username_password_otp():
     return {"username": username, "password": password, "otp": otp}
 
 
+
 def order_car():
+    credentials = get_username_password_otp()
     with sync_playwright() as p:
-        browser = p.chromium.launch(slow_mo=50, headless=False)
-        page = browser.new_page()
-        page.goto(
-            "https://auth.tesla.com/oauth2/v1/authorize?response_type=code&client_id=teslaforbusiness-prod&redirect_uri=https%3A%2F%2Fwww.tesla.com%2Fteslaaccount%2Fbusiness%2Ffulfillment%2Foauth2-connect&scope=email+profile+openid+offline_access&state=4mxCQokkKEr8wCI5pKzetp4wF9RlTxcM"
-        )
-        page.screenshot(path="example.png")
+        browser = p.chromium.launch(headless=False, slow_mo=500)
+        context = browser.new_context()
+        page = context.new_page()
+        page.goto("https://partners.tesla.com/home/")
+        page.get_by_label("Email", exact=True).click()
+        page.get_by_label("Email", exact=True).fill(credentials["username"])
+        page.get_by_role("button", name="Next").click()
+        page.frame_locator("#sec-cpt-if").locator("#robot-checkbox").check()
+        page.frame_locator("#sec-cpt-if").get_by_text("Proceed").click()
+        page.get_by_label("password").click()
+        page.get_by_label("password").fill(credentials["password"])
+        page.get_by_role("button", name="Sign In").click()
+
+        # ---------------------
+        context.close()
         browser.close()
 
 order_car()
