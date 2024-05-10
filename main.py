@@ -1,5 +1,6 @@
 import json
 from subprocess import PIPE, run
+import time
 
 from playwright.sync_api import sync_playwright
 
@@ -25,7 +26,8 @@ def order_car():
         browser = p.chromium.launch(headless=False, slow_mo=500)
         context = browser.new_context()
         page = context.new_page()
-        page.goto("https://partners.tesla.com/home/")
+        page.goto("https://www.tesla.com/teslaaccount/business/orders/")
+
         page.get_by_label("Email", exact=True).click()
         page.get_by_label("Email", exact=True).fill(credentials["username"])
         page.get_by_role("button", name="Next").click()
@@ -41,12 +43,21 @@ def order_car():
         passcode_input = page.locator('[name="passcode"]')
         passcode_input.wait_for(timeout=0)
         credentials = get_username_password_otp()
-        page.get_by_label("passcode").fill(credentials["otp"], timeout=0)
+        page.get_by_label("passcode").click(timeout=60000)
+        page.get_by_label("passcode").fill(credentials["otp"])
         page.get_by_role("button", name="Submit").click()
-        fake_input = page.locator('[name="fake"]')
-        fake_input.wait_for(timeout=0)
-        # context.close()
-        # browser.close()
+        page.get_by_label("Select an Account").click()
+        page.get_by_label("", exact=True).get_by_text("Octopus Electric Vehicles").click()
+        page.get_by_role("button", name="Continue").click()
+        page.get_by_role("button", name="Create Order").click()
+        page.get_by_role("button", name="Next").click()
+        page.get_by_text("Performance All-Wheel Drive£59,990328 mi Range (WLTP)*2.9 sec 0-60 mph163 mph").click()
+        page.get_by_role("img", name="Ultra Red").locator("image").click()
+        page.get_by_role("img", name="Black and White").locator("image").click()
+        page.get_by_role("button", name="Add to Order").click()
+        time.sleep(60000)
+        context.close()
+        browser.close()
 
 
 order_car()
